@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from bokeh.plotting import figure, show
+from bokeh.plotting import figure
 from bokeh.models import Range1d
 import algorithm
 
