@@ -4,14 +4,18 @@ import random
 
 # TSP parameters
 grid_size = 10
-n_places = 10
+n_places = 9
 
 # Places to visit
 def places(grid_size,n_places):
-    return list(zip(np.random.randint(0,grid_size,n_places),np.random.randint(0,grid_size,n_places)))
+    points = list(zip(np.random.randint(0,grid_size,n_places),np.random.randint(0,grid_size,n_places)))
+    while (0,0) in points:
+        points = list(zip(np.random.randint(0,grid_size,n_places),np.random.randint(0,grid_size,n_places)))
+    return points
 
 # Fitness function
-def distance(path):
+def distance(sequence):
+    path=[(0,0)] + sequence + [(0,0)]
     return sum(np.sqrt((path[i][0] - path[i+1][0])**2 + (path[i][1] - path[i+1][1])**2) 
                for i in range(len(path)-1))
 def fitness(solution):
@@ -63,43 +67,60 @@ def mutate(solution, mutation_rate):
         solution[j]=tmp  
     return solution
 
+def add_extremes(sequence):
+    return [(0,0)] + sequence + [(0,0)]
+
 # Genetic algortihm
-def genetic_algorithm(targets, population_size, generations, tournament_size, mutation_rate, elitism):
+def genetic_algorithm(targets, population_size, generations, tournament_size, mutation_rate, elitism,crossover):
     population = initial_population(targets,population_size)
     best_solution=max(population, key=fitness)
     fitness_evolution=[]
     fitness_evolution.append(fitness(max(population, key=fitness)))
     
     # Keep simulating generations
-    df_simulation = pd.DataFrame({'c%i'%i:[population[i]] for i in range(population_size)})
+    df_simulation = pd.DataFrame({'c%i'%i:[add_extremes(population[i])] for i in range(population_size)})
+
+    e = int(elitism*population_size)
+    e = e if (e % 2 == 0) else e+1 # size of elitism: even number
+    nc = int(crossover*population_size) 
+    nc = nc if (nc % 2 == 0) else nc+1 # size of crossover: even number
 
     for t in range(generations):
-        # Elite (not change)
         population = sorted(population,key=fitness)
         population.reverse()
-        e = int(elitism*len(population))
-        e = e if (e % 2 == 0) else e+1 # even elite number
-        elite=population[:e]
+
+        # (1) elite (no mutation)
+        next_generation = population[:e]
 
         # Selection
         selection = random_tournament(population, tournament_size)
         parents=random.sample(selection, len(selection))
-        next_generation = []
+        
+        # (2) direct descendants with mutation
+        for i in range(population_size-nc-e):
+            parent = parents.pop()
+            next_generation.append(mutate(parent,mutation_rate))
 
-        for i in range(0, int(len(parents)/2)):
+        # (3) descendants with croosover and mutation
+        for i in range(int(nc/2)):
             parent1 = parents.pop()
             parent2 = parents.pop()
             child1, child2 = ox_crossover(parent1, parent2)
-            next_generation.append(mutate(child1,0))
-            next_generation.append(mutate(child2,0))
+            next_generation.append(mutate(child1,mutation_rate))
+            next_generation.append(mutate(child2,mutation_rate))
+ 
         population = next_generation
-        population[:e]=elite
+
+        if best_solution not in population:
+            print('Best solution lost!')
+
         fitness_evolution.append(fitness(max(population, key=fitness)))
         if fitness(max(population, key=fitness)) > fitness(best_solution):
             best_solution=max(population, key=fitness) 
-    
+
+        population = sorted(population,key=fitness)
+        population.reverse()
         df_simulation=pd.concat([df_simulation,
-                                 pd.DataFrame({'c%i'%i:[population[i]] for i in range(population_size)})],ignore_index=True)
+                                 pd.DataFrame({'c%i'%i:[add_extremes(population[i])] for i in range(population_size)})],ignore_index=True)
 
-    return best_solution, fitness_evolution, df_simulation
-
+    return add_extremes(best_solution), fitness_evolution, df_simulation

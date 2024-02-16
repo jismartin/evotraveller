@@ -15,7 +15,8 @@ population_size = st.sidebar.slider('Population size', min_value=10, max_value=1
 generations = st.sidebar.slider('Generations', min_value=10, max_value=100, value=50)
 tournament_size = st.sidebar.slider('Tournament size', min_value=2, max_value=10, value=4)
 mutation_rate = st.sidebar.slider('Mutation rate', min_value=0.0, max_value=0.2, value=0.05, step=0.01)
-elitism = st.sidebar.slider('Elitism', min_value=0.0, max_value=1.0, value=0.25, step=0.1)
+elitism = st.sidebar.slider('Elitism', min_value=0.0, max_value=0.5, value=0.1, step=0.1)
+crossover = st.sidebar.slider('Crossover', min_value=0.0, max_value=1.0-elitism, value=0.6, step=0.1)
 
 run=st.button(label='Run')
 
@@ -38,6 +39,18 @@ def fitness_evolution_chart(timeseries):
            toolbar_location=None, match_aspect=True)
     p.line(x, y, color="navy", alpha=0.4, line_width=4)
     p.y_range = Range1d(min(timeseries)-0.0005, max(timeseries)+0.0005)
+    p.background_fill_color = "#efefef"
+    return p
+
+def best_solution_chart(solution):
+    padding=0.1
+    x, y = zip(*solution)
+    p = figure(width=200, height=200, title="Best solution", tools="", 
+           toolbar_location=None, match_aspect=True)
+    p.line(x, y, color="navy", alpha=0.4, line_width=4)
+    p.x_range = Range1d(0-padding, algorithm.grid_size + padding)
+    p.y_range = Range1d(0-padding, algorithm.grid_size + padding)
+    p.axis.visible = False 
     p.background_fill_color = "#efefef"
     return p
 
@@ -72,23 +85,33 @@ if run:
     # Run the genetic algorithm
     targets=algorithm.places(algorithm.grid_size,algorithm.n_places)
     st.session_state['best_solution'],st.session_state['fitness_evolution'], st.session_state['dfsim'] = algorithm.genetic_algorithm(
-        targets, population_size,generations, tournament_size, mutation_rate, elitism)
+        targets, population_size,generations, tournament_size, mutation_rate, elitism,crossover)
+    st.session_state['best_solution']=[(0,0)] + st.session_state['best_solution'] + [(0,0)]
+
+
  
 if st.session_state['run']==True:
-    # Draw the fitness evolution
-    st.write('Fitness evolution')
-    pchart1=fitness_evolution_chart(st.session_state['fitness_evolution'])
-    st.bokeh_chart(pchart1, use_container_width=True)
 
-    # Draw the solution population
-    st.write('Solution population')
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Draw the fitness evolution
+        st.write('Fitness evolution')
+        pchart1=fitness_evolution_chart(st.session_state['fitness_evolution'])
+        st.bokeh_chart(pchart1, use_container_width=True)
+
+    with col2:
+        # Draw the best solution
+        st.write('Best solution')
+        pchart2=best_solution_chart(st.session_state['best_solution'])
+        st.bokeh_chart(pchart2, use_container_width=True)
 
     # Show the solutions
-    st.subheader('Solutions')
+    st.write('Solutions')
     st.session_state['gen']=st.slider('Generation', min_value=0, max_value=generations-1, value=0)
-    pchart2 = solution_population_chart(st.session_state['dfsim'].loc[st.session_state.gen].values.tolist(),
+    pchart3 = solution_population_chart(st.session_state['dfsim'].loc[st.session_state.gen].values.tolist(),
                                              st.session_state['gen'])
-    st.bokeh_chart(pchart2, use_container_width=True)
+    st.bokeh_chart(pchart3, use_container_width=True)
 
 
 st.write('Source code and ⭐ at [GitHub](https://github.com/jismartin/evotraveller)')
