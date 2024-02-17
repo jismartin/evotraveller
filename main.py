@@ -14,7 +14,7 @@ tournament_size = st.sidebar.slider('Tournament size', min_value=2, max_value=10
 mutation_rate = st.sidebar.slider('Mutation rate', min_value=0.0, max_value=0.2, value=0.05, step=0.01)
 elitism = st.sidebar.slider('Elitism', min_value=0.0, max_value=0.5, value=0.1, step=0.1)
 crossover = st.sidebar.slider('Crossover', min_value=0.0, max_value=1.0-elitism, value=0.6, step=0.1)
-st.sidebar.subheader('Descriprion of the parameters')
+st.sidebar.subheader('Description of the parameters')
 st.sidebar.write("Population size: is the number of potential solutions that are randomly evaluated in each generation") 
 st.sidebar.write("Generations: is the maximum number of iterations that the algorithm will run for")
 st.sidebar.write("Tournament size: is the number of individuals that are selected to compete in the tournament")
