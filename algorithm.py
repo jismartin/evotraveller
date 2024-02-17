@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import random
 
-# TSP parameters
+# TSP hyperparameters
 grid_size = 10
 n_places = 9
 
@@ -13,9 +13,13 @@ def places(grid_size,n_places):
         points = list(zip(np.random.randint(0,grid_size,n_places),np.random.randint(0,grid_size,n_places)))
     return points
 
+# Add the start and end points to a sequence
+def add_extremes(sequence):
+    return [(0,0)] + sequence + [(0,0)]
+
 # Fitness function
 def distance(sequence):
-    path=[(0,0)] + sequence + [(0,0)]
+    path=add_extremes(sequence)
     return sum(np.sqrt((path[i][0] - path[i+1][0])**2 + (path[i][1] - path[i+1][1])**2) 
                for i in range(len(path)-1))
 def fitness(solution):
@@ -49,6 +53,7 @@ def ox_copy(parent1,parent2,start,end):
         child[j] = tmp.pop()
     return child
 
+# Generate offsprings
 def ox_crossover(parent1, parent2):
     size = min(len(parent1), len(parent2))
     start, end = sorted(random.sample(range(size), 2))
@@ -66,9 +71,6 @@ def mutate(solution, mutation_rate):
         solution[i]=solution[j]
         solution[j]=tmp  
     return solution
-
-def add_extremes(sequence):
-    return [(0,0)] + sequence + [(0,0)]
 
 # Genetic algortihm
 def genetic_algorithm(targets, population_size, generations, tournament_size, mutation_rate, elitism,crossover):
