@@ -111,7 +111,7 @@ if st.session_state['run']==True:
         st.write('Best solution')
         pchart2=best_solution_chart(st.session_state['best_solution'])
         st.bokeh_chart(pchart2, use_container_width=True)
-        st.write('The path always start and end at the origin (0,0)')
+        st.write('The path always starts and ends at the origin (0,0)')
 
     # Show the solutions
     st.write('Solutions')
