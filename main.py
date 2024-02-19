@@ -133,4 +133,4 @@ if st.session_state['run']==True:
     st.bokeh_chart(pchart3, use_container_width=True)
 
 st.write('Source code and ⭐ at [GitHub](https://github.com/jismartin/evotraveller)')
-st.write('Authors: The Gooniees')
+st.write('Authors: The Goonies')
