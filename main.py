@@ -19,7 +19,7 @@ population_size = st.sidebar.slider('Population size', min_value=10, max_value=1
 generations = st.sidebar.slider('Generations', min_value=10, max_value=100, value=50)
 tournament_size = st.sidebar.slider('Tournament size', min_value=2, max_value=10, value=4)
 mutation_rate = st.sidebar.slider('Mutation rate', min_value=0.0, max_value=0.2, value=0.05, step=0.01)
-elitism = st.sidebar.slider('Elitism', min_value=0.0, max_value=0.5, value=0.1, step=0.1)
+elitism = st.sidebar.slider('Elitism', min_value=0.01, max_value=0.1, value=0.05, step=0.01)
 crossover = st.sidebar.slider('Crossover', min_value=0.0, max_value=1.0-elitism, value=0.6, step=0.1)
 
 ## Parameters description
