@@ -7,6 +7,13 @@ import algorithm
 st.set_page_config(page_title="Genetic algorithm for TSP")
 
 # Sidebar
+
+## TSP parameters
+st.sidebar.subheader('TSP parameters')
+n_places = st.sidebar.slider('Number of places', min_value=5, max_value=15, value=10)
+seed=st.sidebar.number_input('Seed', min_value=0, max_value=10000, value=1111)
+
+## GA parameters
 st.sidebar.subheader('GA parameters')
 population_size = st.sidebar.slider('Population size', min_value=10, max_value=100, value=100, step=2)
 generations = st.sidebar.slider('Generations', min_value=10, max_value=100, value=50)
@@ -14,7 +21,11 @@ tournament_size = st.sidebar.slider('Tournament size', min_value=2, max_value=10
 mutation_rate = st.sidebar.slider('Mutation rate', min_value=0.0, max_value=0.2, value=0.05, step=0.01)
 elitism = st.sidebar.slider('Elitism', min_value=0.0, max_value=0.5, value=0.1, step=0.1)
 crossover = st.sidebar.slider('Crossover', min_value=0.0, max_value=1.0-elitism, value=0.6, step=0.1)
+
+## Parameters description
 st.sidebar.subheader('Description of the parameters')
+st.sidebar.write("Number of places: is the number of cities that the salesman has to visit")
+st.sidebar.write("Seed: is the seed for the random generation of locations of the TSP")
 st.sidebar.write("Population size: is the number of potential solutions that are randomly evaluated in each generation") 
 st.sidebar.write("Generations: is the maximum number of iterations that the algorithm will run for")
 st.sidebar.write("Tournament size: is the number of individuals that are selected to compete in the tournament")
@@ -59,6 +70,7 @@ def best_solution_chart(solution):
     p = figure(width=200, height=200, title="Best solution", tools="", 
            toolbar_location=None, match_aspect=True)
     p.line(x, y, color="navy", alpha=0.4, line_width=4)
+    p.circle(x, y, color='red',size=10)
     p.x_range = Range1d(0-padding, algorithm.grid_size + padding)
     p.y_range = Range1d(0-padding, algorithm.grid_size + padding)
     p.axis.visible = False 
@@ -93,7 +105,7 @@ def solution_population_chart(P,g):
 if run:
     st.session_state['run'] = True
     # Run the genetic algorithm
-    targets=algorithm.places(algorithm.grid_size,algorithm.n_places)
+    targets=algorithm.places(algorithm.grid_size,n_places-1,seed)
     st.session_state['best_solution'],st.session_state['fitness_evolution'], st.session_state['dfsim'] = algorithm.genetic_algorithm(
         targets, population_size,generations, tournament_size, mutation_rate, elitism,crossover)
     st.session_state['best_solution']=[(0,0)] + st.session_state['best_solution'] + [(0,0)]
