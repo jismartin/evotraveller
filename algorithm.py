@@ -5,9 +5,14 @@ import random
 # TSP hyperparameters
 grid_size = 10
 
-# Places to visit
-def places(grid_size,n_places,seed):
+# Set seed
+def set_seed(seed):
     np.random.seed(seed)
+    random.seed(seed)
+
+# Places to visit
+def places(grid_size,n_places):
+    #np.random.seed(seed)
     points = list(zip(np.random.randint(0,grid_size,n_places),np.random.randint(0,grid_size,n_places)))
     while (0,0) in points:
         points = list(zip(np.random.randint(0,grid_size,n_places),np.random.randint(0,grid_size,n_places)))

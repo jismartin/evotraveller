@@ -105,7 +105,8 @@ def solution_population_chart(P,g):
 if run:
     st.session_state['run'] = True
     # Run the genetic algorithm
-    targets=algorithm.places(algorithm.grid_size,n_places-1,seed)
+    algorithm.set_seed(seed)
+    targets=algorithm.places(algorithm.grid_size,n_places-1)
     st.session_state['best_solution'],st.session_state['fitness_evolution'], st.session_state['dfsim'] = algorithm.genetic_algorithm(
         targets, population_size,generations, tournament_size, mutation_rate, elitism,crossover)
     st.session_state['best_solution']=[(0,0)] + st.session_state['best_solution'] + [(0,0)]
