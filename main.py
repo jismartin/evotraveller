@@ -1,7 +1,12 @@
 import streamlit as st
+import streamlit as st
+import streamlit.components.v1 as components # Standard library
+from bokeh.embed import file_html
+from bokeh.resources import CDN
 import numpy as np
 from bokeh.plotting import figure
 from bokeh.models import Range1d
+#from streamlit_bokeh import st_bokeh_chart
 import algorithm
 
 st.set_page_config(page_title="Genetic algorithm for TSP")
@@ -78,28 +83,37 @@ def best_solution_chart(solution):
     return p
 
 # Population of solutions
-def solution_population_chart(P,g):
-    S=int(np.sqrt(population_size)) + 1 
-    padding=0.1
-    L=algorithm.grid_size + 2*padding
+def solution_population_chart(P_input, g):
+    # Use a copy so we don't destroy the data in session_state
+    P = P_input.copy() 
+    S = int(np.sqrt(population_size)) + 1 
+    padding = 0.1
+    L = algorithm.grid_size + 2 * padding
   
-    p = figure(width=400, height=400, title="Generation %i" %g, tools="",
-           toolbar_location=None, match_aspect=True)
+    p = figure(width=400, height=400, title=f"Generation {g}", 
+               tools="pan,wheel_zoom,reset", # Added standard tools
+               toolbar_location=None, match_aspect=True)
 
     for i in range(S):
-        H=i*L + padding 
+        H = i * L + padding 
         for j in range(S):
-            W=j*L + padding
+            W = j * L + padding
             if P:
-                solution=P.pop()
+                solution = P.pop()
                 x, y = zip(*solution)
-                p.line(np.array(x)+W, np.array(y)+H, color="navy", alpha=0.4, line_width=4)
+                p.line(np.array(x) + W, np.array(y) + H, color="navy", alpha=0.4, line_width=2)
 
-    p.x_range = Range1d(0, L*S)
-    p.y_range = Range1d(0, L*(S-1))
+    p.x_range = Range1d(0, L * S)
+    p.y_range = Range1d(0, L * (S - 1))
     p.axis.visible = False 
-    p.background_fill_color = "#efefef"
+    p.background_fill_color = "#f9f9f9" # Lightened for modern look
     return p
+
+# Create a helper function to render the Bokeh plot
+def render_bokeh(plot):
+    html = file_html(plot, CDN, "my plot")
+    # We use a fixed height or adjust based on your plot settings
+    components.html(html, height=plot.height + 20)
 
 # Run the genetic algorithm and draw the charts
 if run:
@@ -114,24 +128,30 @@ if run:
 if st.session_state['run']==True:
 
     col1, col2 = st.columns(2)
+    
     with col1:
-        # Draw the fitness evolution
         st.write('Fitness evolution')
-        pchart1=fitness_evolution_chart(st.session_state['fitness_evolution'])
-        st.bokeh_chart(pchart1, use_container_width=True)
+        pchart1 = fitness_evolution_chart(st.session_state['fitness_evolution'])
+        # 2. Use the helper instead of st.bokeh_chart
+        render_bokeh(pchart1)
+        
     with col2:
-        # Draw the best solution
         st.write('Best solution')
-        pchart2=best_solution_chart(st.session_state['best_solution'])
-        st.bokeh_chart(pchart2, use_container_width=True)
-        st.write('The path always starts and ends at the origin (0,0)')
+        pchart2 = best_solution_chart(st.session_state['best_solution'])
+        # 2. Use the helper instead of st.bokeh_chart
+        render_bokeh(pchart2)
+        st.write('The path starts/ends at (0,0)')
 
     # Show the solutions
     st.write('Solutions')
-    st.session_state['gen']=st.slider('Generation', min_value=0, max_value=generations-1, value=0)
-    pchart3 = solution_population_chart(st.session_state['dfsim'].loc[st.session_state.gen].values.tolist(),
-                                             st.session_state['gen'])
-    st.bokeh_chart(pchart3, use_container_width=True)
+    st.session_state['gen'] = st.slider('Generation', 0, generations-1, value=0)
+    
+    # Crucial: copy the list so .pop() doesn't destroy your session data
+    pop_list = st.session_state['dfsim'].loc[st.session_state.gen].values.tolist().copy()
+    
+    pchart3 = solution_population_chart(pop_list, st.session_state['gen'])
+    # Use the helper instead of st.bokeh_chart
+    render_bokeh(pchart3)
 
 st.write('Source code and ⭐ at [GitHub](https://github.com/jismartin/evotraveller)')
 st.write('Authors: The Goonies')

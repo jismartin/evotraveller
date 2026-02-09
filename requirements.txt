@@ -1,5 +1,5 @@
-streamlit==1.35.0
+streamlit>=1.35.0
 streamlit-feedback
 pandas==2.2.2
 numpy==1.26.4
-bokeh==2.4.3
+bokeh>=3.3.0
