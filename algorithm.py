@@ -93,6 +93,12 @@ def genetic_algorithm(targets, population_size, generations, tournament_size, mu
     e = e if (e % 2 == 0) else e + 1 # size of elitism: even number
     nc = int(crossover*population_size) 
     nc = nc if (nc % 2 == 0) else nc + 1 # size of crossover: even number
+    # Elite and crossover offspring must fit in the population; otherwise the
+    # population would grow (e.g. size 10 and crossover 0.9 gave 12 individuals)
+    e = min(e, population_size)
+    if e + nc > population_size:
+        nc = population_size - e
+        nc = nc if (nc % 2 == 0) else nc - 1 # keep it even
 
     for t in range(generations):
         
